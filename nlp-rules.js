@@ -551,34 +551,12 @@ window.NLPRules = (() => {
 
   // ── Sample text demonstrating all 7 themes ─────────────────────────────
   var SAMPLE_TEXT = [
-    "Indigenous communities in this region are frequently described as dysfunctional, requiring sustained",
-    "government intervention, direct oversight, and compliance monitoring to address persistent social",
-    "problems. At-risk Aboriginal youth lack the capacity to access services without intensive supervision,",
-    "and communities may achieve earned autonomy once they demonstrate sustained compliance with funding",
-    "requirements. These Aboriginal peoples, along with other disadvantaged groups such as visible minorities",
-    "and newcomers, continue to face significant service barriers.",
-    "",
-    "Research consistently associates Aboriginal populations with high rates of alcoholism, drug abuse, and",
-    "gambling addictions that are holding many back from progress. Indigenous informants were recruited using",
-    "snowball sampling. Shamans and medicine men in these communities preserve traditional myths and legends,",
-    "and community training programs are described as essential for addressing the problem of persistent",
-    "dysfunction.",
-    "",
-    "Some service providers resist targeted programs: \"I just prefer to treat everyone the same — why are",
-    "we singling out Aboriginal communities? We should help everyone equally and do this across the board for",
-    "everyone. Anything else is just reverse discrimination.\"",
-    "",
-    "Historical accounts celebrate the triumphant discovery of the New World and describe how European",
-    "explorers brought civilization to the friendly, gentle natives they encountered. The harmonious meeting",
-    "of two cultures produced a prosperous new society on lands previously inhabited by fundamentally",
-    "different peoples.",
-    "",
-    "In contrast, researchers who engage respectfully with these communities demonstrate meaningful",
-    "commitments to reconciliation: consulting Elders and Knowledge Keepers, applying OCAP\u00ae principles,",
-    "honouring UNDRIP obligations, and employing strengths-based, trauma-informed, and culturally safe",
-    "methodologies that centre self-determination and decolonize research frameworks through genuine",
-    "Nation-to-Nation partnerships.",
-  ].join("\n");
+    "Indigenous communities in this region are frequently described as dysfunctional, requiring sustained government intervention, direct oversight, and compliance monitoring to address persistent social problems. At-risk Aboriginal youth lack the capacity to access services without intensive supervision, and communities may achieve earned autonomy once they demonstrate sustained compliance with funding requirements. These Aboriginal peoples, along with other disadvantaged groups such as visible minorities and newcomers, continue to face significant service barriers.",
+    "Research consistently associates Aboriginal populations with high rates of alcoholism, drug abuse, and gambling addictions that are holding many back from progress. Indigenous informants were recruited using snowball sampling. Shamans and medicine men in these communities preserve traditional myths and legends, and community training programs are described as essential for addressing the problem of persistent dysfunction.",
+    "Some service providers resist targeted programs: \"I just prefer to treat everyone the same \u2014 why are we singling out Aboriginal communities? We should help everyone equally and do this across the board for everyone. Anything else is just reverse discrimination.\"",
+    "Historical accounts celebrate the triumphant discovery of the New World and describe how European explorers brought civilization to the friendly, gentle natives they encountered. The harmonious meeting of two cultures produced a prosperous new society on lands previously inhabited by fundamentally different peoples.",
+    "In contrast, researchers who engage respectfully with these communities demonstrate meaningful commitments to reconciliation: consulting Elders and Knowledge Keepers, applying OCAP\u00ae principles, honouring UNDRIP obligations, and employing strengths-based, trauma-informed, and culturally safe methodologies that centre self-determination and decolonize research frameworks through genuine Nation-to-Nation partnerships.",
+  ].join("\n\n");
 
   // ── Proximity window (chars) ─────────────────────────────────────────────
   var PROX_WINDOW = 350;
