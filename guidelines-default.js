@@ -1,180 +1,225 @@
 // ============================================================
 //  Default Guidelines — embedded for GitHub Pages (no server)
+//  Based on: Wahpepah et al. (2024) systematic review of linguistic
+//  representation of Indigenous Peoples in academic literature.
 //  Edit in the UI or replace this file.
 // ============================================================
-const DEFAULT_GUIDELINES = `================================================================================
-  INDIGENOUS LANGUAGE SENSITIVITY GUIDELINES
-  For AI-Assisted Document Review
-  Version 0.1 — Community-Editable
-================================================================================
-
-PURPOSE
--------
-This document provides instructions for the AI analysis agent. The agent reads
-this file at analysis time to understand what language patterns to look for,
-how to rate severity, and what alternatives to suggest.
-
-Organisations should customise this file to reflect their specific style
-guide, the indigenous communities most relevant to their work, and any
-domain-specific terminology.
-
-
-================================================================================
-1. GENERAL PRINCIPLES
-================================================================================
-
-• Indigenous peoples are diverse. Avoid language that treats all indigenous
-  cultures as a single monolithic group.
-
-• Use the specific name of a Nation or community whenever possible
-  (e.g., "Diné" or "Navajo" rather than just "Native Americans").
-
-• Respect self-determination in naming — use the terms that communities
-  use for themselves.
-
-• Land acknowledgements should be specific and action-oriented, not
-  performative.
-
-• Capitalise "Indigenous" when referring to peoples (as a proper noun).
-
-
-================================================================================
-2. HIGH-SEVERITY TERMS (replace in virtually all modern contexts)
-================================================================================
-
-Term: "Indian" (referring to indigenous peoples of the Americas)
-Why: Colonial misnomer originating from Columbus's geographical error.
-Replace with: Indigenous, Native, First Nations, or specific nation name.
-
-Term: "Eskimo"
-Why: Considered pejorative by many Inuit and Yupik peoples.
-Replace with: Inuit, Yupik, or specific community name.
-
-Term: "Savage" / "Savages"
-Why: Dehumanising colonial rhetoric used to justify violence.
-Replace with: Remove or rephrase entirely depending on context.
-
-Term: "Primitive"
-Why: Implies a hierarchy of "civilisation" with European cultures at the top.
-Replace with: Traditional, ancestral, long-standing, time-honoured.
-
-Term: "Pagan" / "Heathen" (for indigenous spiritual practices)
-Why: Dismissive of indigenous spirituality; privileges Abrahamic framing.
-Replace with: Traditional spiritual practices, ceremonial practices.
-
-Term: "Medicine man"
-Why: Over-simplified and potentially trivialises sacred ceremonial roles.
-Replace with: Traditional healer, spiritual leader, Elder, knowledge keeper.
-
-
-================================================================================
-3. MEDIUM-SEVERITY TERMS (context-dependent; often inappropriate)
-================================================================================
-
-Term: "Spirit animal"
-Why: Trivialises sacred indigenous spiritual relationships with animals.
-Replace with: Kindred symbol, personal inspiration, favourite animal.
-
-Term: "Pow wow" (outside cultural context)
-Why: Appropriation of a significant cultural and spiritual gathering.
-Replace with: Meeting, brainstorm, catch-up, get-together.
-
-Term: "Low man on the totem pole"
-Why: Misrepresents the cultural significance of totem poles.
-Replace with: Lowest-ranking, least senior, newest member.
-
-Term: "Off the reservation"
-Why: Rooted in the forced confinement of Native peoples to reservations.
-Replace with: Off track, going rogue, outside the norm.
-
-Term: "Circle the wagons"
-Why: Frames indigenous peoples as an external threat to be defended against.
-Replace with: Rally together, regroup, consolidate defences.
-
-Term: "Indian giver"
-Why: Offensive stereotype about indigenous trustworthiness.
-Replace with: Describe the actual behaviour without the slur.
-
-Term: "Rain dance"
-Why: Trivialises sacred indigenous ceremonies.
-Replace with: Wishful thinking, hoping for the best.
-
-Term: "Discovered" (referring to lands already inhabited by indigenous peoples)
-Why: Erases thousands of years of prior indigenous presence.
-Replace with: Colonised, arrived at, encountered, made contact with.
-
-Term: "New World"
-Why: Eurocentric framing — it was not "new" for the millions already living there.
-Replace with: The Americas, Western Hemisphere.
-
-
-================================================================================
-4. STEREOTYPING PATTERNS (narrative-level issues)
-================================================================================
-
-Pattern: NOBLE SAVAGE
-Description: Romanticising indigenous peoples as "pure," "spiritual," or
-  "one with nature" while denying their complexity and modernity.
-Example: "They lived in perfect harmony with the land."
-Fix: Be specific about sustainable practices without romanticising.
-
-Pattern: VANISHING RACE
-Description: Suggesting indigenous peoples and cultures are extinct or dying out.
-Example: "The last of their kind" / "a lost civilisation."
-Fix: Emphasise living cultures, contemporary communities, and resilience.
-
-Pattern: SAVIOUR NARRATIVE
-Description: Framing non-indigenous people as benevolent rescuers.
-Example: "We brought civilisation to the wilderness."
-Fix: Acknowledge indigenous agency; describe mutual exchange or colonisation honestly.
-
-Pattern: MONOLITHIC PORTRAYAL
-Description: Treating all indigenous peoples as interchangeable.
-Example: "Indigenous people believe that …"
-Fix: Specify which nation or community; acknowledge cultural diversity.
-
-Pattern: POSSESSIVE FRAMING
-Description: Using possessive language such as "our Aboriginals," "their natives."
-Fix: Refer to peoples using their own self-determined terms without possessive pronouns.
-
-
-================================================================================
-5. CONTEXT-SENSITIVE TERMS (flag for review, may be acceptable)
-================================================================================
-
-• "Aboriginal" — Preferred in Australian contexts; less common elsewhere.
-• "Native" — Often acceptable as an adjective; review tone and context.
-• "Tribe" — Appropriate for actual self-identified indigenous tribes;
-  inappropriate in corporate slang ("find your tribe").
-• "Elder" — Respectful when capitalised and referring to indigenous Elders.
-• "Traditional" — Usually fine; problematic only if used to mean "outdated."
-
-
-================================================================================
-6. REPLACEMENT PRINCIPLES
-================================================================================
-
-When suggesting replacements the AI should:
-
-1. Prefer people-first language: "indigenous peoples" not "the indigenous."
-2. Use the most specific and accurate term available.
-3. Offer 2-3 ranked alternatives (most specific → most general).
-4. Preserve the author's original intent while removing bias.
-5. Capitalise "Indigenous" when used as a proper noun referring to peoples.
-6. Avoid introducing new bias or awkward phrasing.
-
-
-================================================================================
-7. REFERENCES
-================================================================================
-
-• United Nations Declaration on the Rights of Indigenous Peoples (UNDRIP)
-• "Elements of Indigenous Style" by Gregory Younging (Brush Education, 2018)
-• National Congress of American Indians — Proper Terminology Guide
-• AIATSIS — Guidelines for Ethical Research in Australian Indigenous Studies
-• Māori Language Commission — Te Taura Whiri i te Reo Māori
-• Canadian Press Stylebook — Indigenous Peoples section
-
-================================================================================
-  END OF GUIDELINES — Edit this file to customise for your organisation
-================================================================================`;
+const DEFAULT_GUIDELINES = [
+"================================================================================",
+"  INDIGENOUS LANGUAGE SENSITIVITY GUIDELINES",
+"  Grounded in: Wahpepah et al. (2024) reflexive thematic analysis",
+"  (179 coded data items, 59 articles, 7 themes)",
+"  Version 2.0 — Community-Editable",
+"================================================================================",
+"",
+"PURPOSE",
+"-------",
+"These guidelines instruct the AI on what language patterns to look for,",
+"how to categorise them by theme, how to rate severity, and what alternatives",
+"to suggest. The seven themes are drawn directly from academic literature",
+"on how Indigenous Peoples are represented — and misrepresented — in academic",
+"and professional writing.",
+"",
+"Customise this text to reflect your organisation's specific context, the",
+"Nations most relevant to your work, and any domain-specific terminology.",
+"",
+"",
+"================================================================================",
+"THEME 1 — PATERNALISTIC ATTITUDES & JUSTIFICATION FOR INTERVENTION",
+"(most common theme, ~30% of coded items)",
+"================================================================================",
+"",
+"Represents the settler perspective that Indigenous Peoples are inferior or",
+"in need of assistance, giving settlers authority over them.",
+"",
+"HIGH severity:",
+'• "dysfunctional" applied to Indigenous communities',
+'• "earned autonomy" — implies self-governance is a conditional privilege',
+'• "welfare dependency / welfare trap" — individualises structural poverty',
+'• "inferior," "incapable," "incompetent"',
+"",
+"MEDIUM severity:",
+'• Intervention framing: "intervene," "take over," "emergency response"',
+'• Compliance language in funding/governance contexts',
+'• "Problem of" [community] — frames the community as the problem',
+'• "At-risk," "high-risk communities" without structural framing',
+"",
+"LOW severity:",
+'• "Capacity-building" applied to Indigenous peoples without structural context',
+'• "Oversight," "monitoring," "supervision" in Indigenous governance contexts',
+"",
+"Example from literature: 'you have got to grab control of the communities'",
+"(John Howard, PM, in Freeman et al., 2022)",
+"",
+"",
+"================================================================================",
+"THEME 2 — STEREOTYPING (~21% of coded items)",
+"================================================================================",
+"",
+"Oversimplified or distorted narratives about Indigenous Peoples' history,",
+"cultural identity, and individuality.",
+"",
+"HIGH severity:",
+'• "They drink too much," alcohol framing as a group characteristic',
+'• "noble savage," "vanishing race," "last of their kind"',
+"• Assuming cirrhosis = alcohol misuse for Indigenous patients without asking",
+"",
+"MEDIUM severity:",
+"• Group-level associations: alcoholism, drug abuse, gambling addiction",
+'• "Free education / free land / government handouts" — Aboriginal advantage myth',
+"  (ignores treaty rights, constitutional entitlements, systemic inequity)",
+"• Myths, legends, folklore — use: oral traditions, sacred narratives",
+"• Spirit animals, pow wows, shamans, medicine men (trivialising use)",
+'• "Extremely white" as coded praise for assimilation',
+"",
+"Example from literature: \"'They drink too much and get in fights' attributed",
+"as a group characteristic\" (Lyubymova, 2019)",
+"",
+"",
+"================================================================================",
+"THEME 3 — MANIFESTATION OF COLONIAL ATTITUDES (~17% of coded items)",
+"================================================================================",
+"",
+"Deliberate or subtle language that demeans, dehumanises, or reinforces",
+"power imbalances between settlers and Indigenous Peoples.",
+"",
+"HIGH severity (replace in all modern contexts):",
+'• "Savage," "savages" — dehumanising colonial rhetoric',
+'• "Primitive" — implies a civilisational hierarchy with Europeans at the top',
+'• "Squaw" — racial and sexual slur',
+'• "Redskin" — racial slur connected to scalp bounties',
+'• "Eskimo" — rejected by Inuit Circumpolar Council; use Inuit or Yupik',
+'• "Indian giver" — misrepresents Indigenous gifting customs',
+'• "Off the reservation" — references violent confinement policies',
+'• "Uncivilised"',
+"",
+"MEDIUM severity:",
+'• "Indians" referring to Indigenous peoples of the Americas',
+'• "Circle the wagons," "rain dance," "going native"',
+'• "Informants" in research — use: knowledge keepers, participants',
+"• Describing colonial violence as mutual/reciprocal when it was not",
+'• "Training" applied to Indigenous peoples (echoes residential school context)',
+"",
+"Example from literature: \"'Training' sounds like something done to animals",
+"or domestic servants\" (Pyett et al., 2008)",
+"",
+"",
+"================================================================================",
+"THEME 4 — OTHERING (~7% of coded items)",
+"================================================================================",
+"",
+"Social and cultural labelling that exoticises and marginalises Indigenous",
+"Peoples, maintaining the misperception they are fundamentally different.",
+"",
+"HIGH severity:",
+'• "The Indigenous problem / question / issue"',
+"",
+"MEDIUM severity:",
+'• "These [Indigenous] people," "those people"',
+"• Bundling Indigenous Peoples with visible minorities / newcomers in ways that",
+"  erase their distinct constitutional and Treaty status in Canada",
+"• Exoticisation — treating Indigenous practices as curiosities",
+'• "Fundamentally different" essentialism',
+"",
+"Example from literature: grouping 'Aboriginal or Torres Strait Islander,",
+"Polynesian, Asian or Middle Eastern' erases distinct Indigenous status",
+"(Bednarek, 2020)",
+"",
+"",
+"================================================================================",
+"THEME 5 — RESPECTFUL PRACTICES (~11% of coded items) — POSITIVE",
+"================================================================================",
+"",
+"Flag these as POSITIVE findings (severity: positive) to acknowledge and",
+"encourage good practice. This was the ONLY strengths-based theme in the",
+"literature — its low frequency highlights a significant gap in academic writing.",
+"",
+"• Specific Nation names (Anishinaabe, Cree, Haudenosaunee, Mi'kmaq, etc.)",
+"• Knowledge Keepers, Elders (capitalised), Traditional Knowledge holders",
+"• OCAP® principles (Ownership, Control, Access, Possession)",
+"• UNDRIP, Bill C-15, Nation-to-Nation relationships",
+"• Free, Prior and Informed Consent (FPIC)",
+"• Self-determination, decolonise/decolonization",
+"• Strengths-based language acknowledging inherent capabilities",
+"• Trauma-informed, culturally safe, culturally appropriate approaches",
+"• Two-Eyed Seeing / Etuaptmumk (attribute to Elder Albert Marshall)",
+"• Reconciliation (when paired with structural commitment, not superficially)",
+"• Treaty rights, constitutional recognition under s.35",
+"",
+"Example from literature: 'First Nations and Metis education goals are not an",
+"add-on but are integral to the planning ... of the education sector as a whole'",
+"(Wotherspoon & Milne, 2020)",
+"",
+"",
+"================================================================================",
+"THEME 6 — REVISIONIST HISTORY (~6% of coded items)",
+"================================================================================",
+"",
+"Sanitising, glamorising, or diluting the violence of colonisation.",
+"",
+"HIGH severity:",
+'• "Cowboys and Indians" framing',
+'• "Brought civilisation," "civilising mission"',
+'• "Friendly / gentle natives" — sanitised contact narrative',
+"",
+"MEDIUM severity:",
+'• "New World" — Eurocentric; the Americas had 15,000+ years of history',
+'• "Discovered," "discovery of" lands with existing Indigenous populations',
+"• Harmonious contact narratives omitting violence",
+"• Triumphal framing of colonial exploration",
+"• Tourist-board narratives presenting colonisation as benevolent/mutual",
+"",
+"Example from literature: Columbus narratives 'end on a positive note extolling",
+"exploration and discovery' while omitting the conflict that followed",
+"(Desai, 2014)",
+"",
+"",
+"================================================================================",
+"THEME 7 — EGALITARIAN COLOR-BLINDNESS (~5% of coded items)",
+"================================================================================",
+"",
+"Disregarding racial/cultural differences in the name of alleged equality —",
+"weaponising equality claims to justify exclusionary practices.",
+"",
+"HIGH severity:",
+'• "Treat everyone the same" opposing Indigenous-specific programs',
+'• "Why target / single out [Indigenous peoples]?"',
+'• "Reverse discrimination" claims about Indigenous rights',
+"",
+"MEDIUM severity:",
+'• "Across the board for everyone" against Treaty-based programs',
+'• "Level the playing field" — assumes procedural equality addresses structural harm',
+"",
+"Example from literature: 'Why do we have to target these people so much?",
+"Make it across the board for everyone.' (Tang & Browne, 2008)",
+"",
+"",
+"================================================================================",
+"GENERAL PRINCIPLES (apply across all themes)",
+"================================================================================",
+"",
+"• Use the specific Nation name when possible rather than generic terms.",
+"• Respect self-determination in naming — use the terms communities use.",
+'• Capitalise "Indigenous," "Elders," "Knowledge Keepers," "Traditional Custodians."',
+'• Prefer people-first language: "Indigenous peoples" not "the Indigenous."',
+"• Flag framing and implication, not only explicit slurs.",
+"• In Canadian legal/historical contexts, note when 'Indian' retains specific",
+"  meaning under the Indian Act before recommending replacement.",
+"",
+"",
+"================================================================================",
+"REFERENCES",
+"================================================================================",
+"",
+"• Wahpepah et al. (2024) — Systematic review, reflexive thematic analysis",
+"• Gregory Younging — Elements of Indigenous Style (Brush Education, 2018)",
+"• UN Declaration on the Rights of Indigenous Peoples (UNDRIP)",
+"• Canada's Bill C-15 (2021)",
+"• First Nations Information Governance Centre — OCAP® Principles",
+"• Tuck & Yang (2012) — Decolonization is not a metaphor",
+"• Constitution Act, 1982 — Section 35",
+"",
+"================================================================================",
+"  END OF GUIDELINES — Edit above to customise for your organisation",
+"================================================================================",
+].join("\n");

@@ -76,6 +76,45 @@ body {
 }
 .icon-btn:hover { background: rgba(255,255,255,.25); }
 
+/* --- Header Controls -------------------------------------------- */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+/* --- Mode Toggle ------------------------------------------------- */
+.mode-toggle {
+  display: flex;
+  background: rgba(0,0,0,.2);
+  border-radius: 20px;
+  padding: 3px;
+  gap: 2px;
+}
+.mode-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.75);
+  padding: .3rem .75rem;
+  border-radius: 16px;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+  line-height: 1;
+}
+.mode-toggle-btn:hover { background: rgba(255,255,255,.15); color: white; }
+.mode-toggle-btn.active { background: white; color: var(--blue-600); }
+
+@media (max-width: 600px) {
+  .mode-toggle-btn { font-size: 0; gap: 0; padding: .35rem .5rem; }
+  .mode-toggle-btn svg { width: 16px; height: 16px; }
+}
+
 /* --- Settings Panel ---------------------------------------------- */
 .settings-panel {
   background: var(--gray-100);
@@ -443,6 +482,87 @@ body {
 
 /* --- Utility ----------------------------------------------------- */
 .hidden { display: none !important; }
+
+/* --- Engine badge (shown after scan) ----------------------------- */
+.engine-badge {
+  display: inline-block;
+  font-size: .7rem;
+  font-weight: 700;
+  padding: .15rem .55rem;
+  border-radius: 12px;
+  vertical-align: middle;
+  letter-spacing: .02em;
+  margin-left: .4rem;
+}
+.engine-badge-llm {
+  background: #e9d8fd;
+  color: #553c9a;
+}
+.engine-badge-rule {
+  background: var(--green-100);
+  color: var(--green-600);
+}
+
+/* --- Settings: api-key-row is a plain block container ------------ */
+#api-key-row label { margin-top: .75rem; }
+
+/* ── Theme-grouped results list ──────────────────────────────────── */
+.theme-group { border-radius: 8px; overflow: hidden; margin-bottom: .75rem; border: 1px solid rgba(0,0,0,.08); }
+
+.theme-group-header {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .45rem .65rem; font-size: .78rem; font-weight: 700; line-height: 1.2;
+}
+.theme-number {
+  flex-shrink: 0; width: 1.4rem; height: 1.4rem;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 800; background: rgba(0,0,0,.18); color: #fff;
+}
+.theme-name  { flex: 1; }
+.theme-count {
+  flex-shrink: 0; background: rgba(0,0,0,.18); color: #fff;
+  border-radius: 10px; padding: 0 .5rem; font-size: .7rem;
+}
+.theme-group-findings { padding: .35rem .45rem .45rem; display: flex; flex-direction: column; gap: .3rem; }
+
+/* Theme colours */
+.theme-paternalistic .theme-group-header { background: #c53030; color: #fff; }
+.theme-paternalistic { background: #fff5f5; }
+.theme-stereotyping  .theme-group-header { background: #c05621; color: #fff; }
+.theme-stereotyping  { background: #fffaf0; }
+.theme-colonial      .theme-group-header { background: #702459; color: #fff; }
+.theme-colonial      { background: #fff0f6; }
+.theme-othering      .theme-group-header { background: #553c9a; color: #fff; }
+.theme-othering      { background: #faf5ff; }
+.theme-respectful    .theme-group-header { background: #276749; color: #fff; }
+.theme-respectful    { background: #f0fff4; }
+.theme-revisionist   .theme-group-header { background: #1a4971; color: #fff; }
+.theme-revisionist   { background: #ebf8ff; }
+.theme-colorblind    .theme-group-header { background: #744210; color: #fff; }
+.theme-colorblind    { background: #fffff0; }
+
+/* Positive (Respectful Practices) badge */
+.severity-badge.severity-positive {
+  background: var(--green-100); color: var(--green-600);
+  font-size: .7rem; font-weight: 700;
+}
+
+/* Highlight for respectful practices in text */
+.highlight-positive {
+  background: #c6f6d5; border-bottom: 2px solid #276749; cursor: pointer; border-radius: 2px;
+}
+
+/* Theme label in detail modal */
+.theme-label {
+  font-size: .78rem; font-weight: 600; padding: .2rem .5rem; border-radius: 4px; display: inline-block;
+}
+.theme-label.theme-paternalistic { background: #fff5f5; color: #c53030; }
+.theme-label.theme-stereotyping  { background: #fffaf0; color: #c05621; }
+.theme-label.theme-colonial      { background: #fff0f6; color: #702459; }
+.theme-label.theme-othering      { background: #faf5ff; color: #553c9a; }
+.theme-label.theme-respectful    { background: #f0fff4; color: #276749; }
+.theme-label.theme-revisionist   { background: #ebf8ff; color: #1a4971; }
+.theme-label.theme-colorblind    { background: #fffff0; color: #744210; }
 
 /* --- No-results state -------------------------------------------- */
 .no-findings {

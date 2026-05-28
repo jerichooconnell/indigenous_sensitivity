@@ -8,6 +8,7 @@
 
   // ── State ──────────────────────────────────────────────────
   let findings = [];
+  let orderedFindings = []; // card-index → finding, set by renderResults
   let scanning = false;
 
   // ── DOM refs ───────────────────────────────────────────────
@@ -20,6 +21,10 @@
   const settingsPanel   = $("#settings-panel");
   const apiKeyInput     = $("#api-key");
   const modelSelect     = $("#model-select");
+  const analysisModeSelect = $("#analysis-mode");
+  const apiKeyRow       = $("#api-key-row");
+  const modeHintLlm     = $("#mode-hint-llm");
+  const modeHintRule    = $("#mode-hint-rule");
   const btnSave         = $("#btn-save-settings");
   const btnCancel       = $("#btn-cancel-settings");
   const charCount       = $("#char-count");
@@ -34,6 +39,7 @@
   const setupHint       = $("#setup-hint");
   const scanLabel       = $(".scan-label");
   const scanSpinner     = $(".scan-spinner");
+  const engineBadge     = $("#engine-badge");
   const guidelinesEditor  = $("#guidelines-editor");
   const btnResetGuide     = $("#btn-reset-guidelines");
   const btnSaveGuide      = $("#btn-save-guidelines");
@@ -42,6 +48,9 @@
   const modalTitle        = $("#modal-title");
   const modalBody         = $("#modal-body");
   const btnCloseModal     = $("#btn-close-modal");
+  const btnSample         = $("#btn-sample");
+  const headerToggleRule  = $("#toggle-rule");
+  const headerToggleLlm   = $("#toggle-llm");
 
   // ── Init ───────────────────────────────────────────────────
   function init() {
@@ -55,19 +64,51 @@
   function loadSettings() {
     const key = localStorage.getItem("ilr_api_key") || "";
     const model = localStorage.getItem("ilr_model") || "gpt-4o-mini";
+    const mode = localStorage.getItem("ilr_analysis_mode") || "llm";
     apiKeyInput.value = key;
     modelSelect.value = model;
+    analysisModeSelect.value = mode;
+    applyModeUI(mode);
     if (key) setupHint.classList.add("hidden");
   }
 
   function saveSettings() {
     const key = apiKeyInput.value.trim();
     const model = modelSelect.value;
+    const mode = analysisModeSelect.value;
+
+    if (mode === "llm" && !key) {
+      alert("LLM mode requires an OpenAI API key. Please enter one above, or switch to Rule-based Analysis.");
+      return;
+    }
+
     localStorage.setItem("ilr_api_key", key);
     localStorage.setItem("ilr_model", model);
+    localStorage.setItem("ilr_analysis_mode", mode);
     settingsPanel.classList.add("hidden");
-    if (key) setupHint.classList.add("hidden");
-    else setupHint.classList.remove("hidden");
+
+    const needsKey = mode === "llm";
+    if (needsKey && !key) setupHint.classList.remove("hidden");
+    else setupHint.classList.add("hidden");
+
+    updateScanButton();
+  }
+
+  function applyModeUI(mode) {
+    if (mode === "rule-based") {
+      apiKeyRow.style.display = "none";
+      modeHintLlm.style.display = "none";
+      modeHintRule.style.display = "";
+    } else {
+      apiKeyRow.style.display = "";
+      modeHintLlm.style.display = "";
+      modeHintRule.style.display = "none";
+    }
+    // Sync header toggle active state
+    if (headerToggleRule && headerToggleLlm) {
+      headerToggleRule.classList.toggle("active", mode === "rule-based");
+      headerToggleLlm.classList.toggle("active", mode === "llm");
+    }
     updateScanButton();
   }
 
@@ -99,9 +140,11 @@
 
   // ── Scan button state ─────────────────────────────────────
   function updateScanButton() {
+    const mode = analysisModeSelect ? analysisModeSelect.value : "llm";
     const hasKey = !!localStorage.getItem("ilr_api_key");
     const hasText = textInput.textContent.trim().length > 0;
-    btnScan.disabled = !hasKey || !hasText || scanning;
+    const ready = mode === "rule-based" ? hasText : (hasKey && hasText);
+    btnScan.disabled = !ready || scanning;
   }
 
   // ── Events ─────────────────────────────────────────────────
@@ -112,6 +155,22 @@
     });
     btnSave.addEventListener("click", saveSettings);
     btnCancel.addEventListener("click", () => settingsPanel.classList.add("hidden"));
+
+    // Mode dropdown — live update UI without saving
+    analysisModeSelect.addEventListener("change", () => {
+      applyModeUI(analysisModeSelect.value);
+    });
+
+    // Header mode toggle — saves immediately & updates select
+    [headerToggleRule, headerToggleLlm].forEach(btn => {
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.mode;
+        analysisModeSelect.value = mode;
+        localStorage.setItem("ilr_analysis_mode", mode);
+        applyModeUI(mode);
+      });
+    });
 
     // Text input
     textInput.addEventListener("input", () => {
@@ -142,6 +201,9 @@
     // Scan
     btnScan.addEventListener("click", onScan);
 
+    // Sample text
+    if (btnSample) btnSample.addEventListener("click", loadSampleText);
+
     // Error dismiss
     btnDismissError.addEventListener("click", () => errorBox.classList.add("hidden"));
 
@@ -161,6 +223,16 @@
     });
   }
 
+  // ── Load sample text ──────────────────────────────────────
+  function loadSampleText() {
+    if (!window.NLPRules || !window.NLPRules.SAMPLE_TEXT) return;
+    textInput.textContent = window.NLPRules.SAMPLE_TEXT;
+    textInput.dispatchEvent(new Event("input"));
+    // Switch to rule-based mode automatically
+    analysisModeSelect.value = "rule-based";
+    applyModeUI("rule-based");
+  }
+
   // ── Clear results ─────────────────────────────────────────
   function clearResults() {
     findings = [];
@@ -177,13 +249,15 @@
     const rawText = textInput.textContent.trim();
     if (!rawText) return;
 
+    const mode = analysisModeSelect.value;
     const apiKey = localStorage.getItem("ilr_api_key");
-    if (!apiKey) {
-      showError("No API Key", "Please open Settings and enter your OpenAI API key.", "Click the gear icon in the top-right corner.");
+
+    if (mode === "llm" && !apiKey) {
+      showError("No API Key", "Please open Settings and enter your OpenAI API key, or switch to Rule-based Analysis mode.", "Click the gear icon in the top-right corner.");
       return;
     }
 
-    // UI ─ scanning state
+    // UI — scanning state
     scanning = true;
     updateScanButton();
     scanLabel.classList.add("hidden");
@@ -195,8 +269,13 @@
     resultsSummary.textContent = "";
 
     try {
-      findings = await analyseText(rawText, apiKey, modelSelect.value);
-      renderResults(rawText, findings);
+      if (mode === "rule-based") {
+        findings = window.NLPRules.analyse(rawText);
+        renderResults(rawText, findings, "rule-based");
+      } else {
+        findings = await analyseText(rawText, apiKey, modelSelect.value);
+        renderResults(rawText, findings, "llm");
+      }
     } catch (err) {
       showError(err.title || "Analysis Error", err.message, err.hint || "");
     } finally {
@@ -231,22 +310,104 @@
   }
 
   async function analyseChunk(text, guidelines, apiKey, model) {
-    const systemPrompt = `You are a cultural sensitivity review assistant. Analyse text for language that may be offensive, biased, or insensitive toward indigenous peoples.
+    const systemPrompt = `You are an expert reviewer of academic and professional writing for language that misrepresents, stereotypes, or harms Indigenous Peoples.
 
-Use these guidelines:
+Your analysis is grounded in a systematic review of the literature (Wahpepah et al., 2024) that identified seven recurring themes of problematic linguistic representation. For each finding, identify which theme it belongs to. Also flag positive respectful practices using Theme 5.
+
+SEVEN THEMES TO DETECT:
+
+Theme 1 — PATERNALISTIC ATTITUDES & JUSTIFICATION FOR INTERVENTION (most prevalent, ~30%)
+Represents the settler perspective that Indigenous Peoples are inferior or in need of external assistance, allowing settlers to assume authority over them. Look for:
+- Language framing Indigenous communities as "dysfunctional," "chaotic," or inherently incapable
+- Interventions disguised as aid: "grab control," "take over," "emergency response"
+- Conditional autonomy language: "earned autonomy," "subject to oversight until compliance"
+- Deficit narratives: framing the community as the source of problems rather than colonial structures
+- Paternalistic contract language that obscures power imbalances (e.g., "active partnership" used to describe top-down relationships)
+- "At-risk," "high-risk community," "capacity-building" applied to Indigenous peoples without structural framing
+Example from literature: "you've got to grab control of the communities" (John Howard, PM, 2007)
+
+Theme 2 — STEREOTYPING (~21%)
+Portrayal of Indigenous Peoples through oversimplified or distorted narratives about their history, cultural identity, and individuality. Look for:
+- Group-level associations with alcoholism, drug abuse, gambling addiction
+- "They drink too much," "drug problem on the reservation"
+- Assumptions built into clinical questions (e.g., assuming cirrhosis = alcohol without asking)
+- "Extremely white" as a compliment implying assimilation equals success
+- Myths, legends, folklore (instead of oral traditions / sacred narratives)
+- Spirit animals, pow wows, shamans, medicine men (casual or trivialising use)
+- Claims of "Aboriginal advantage" (free land, government handouts) that deny treaty rights
+- Noble savage / vanishing race / romanticisation tropes
+Example from literature: "'They drink too much and get in fights'" attributed as group characteristic
+
+Theme 3 — MANIFESTATION OF COLONIAL ATTITUDES (~17%)
+Deliberate or subtle language that demeans, dehumanises, or reinforces power imbalances. Look for:
+- High-severity slurs: savage, primitive, squaw, redskin, Eskimo
+- Colonial idioms: "off the reservation," "circle the wagons," "Indian giver," "rain dance," "going native"
+- Under/over-representation creating false impressions (e.g., "Aboriginal children" without "some" or "alleged" implying universality)
+- "Training" applied to Indigenous peoples (echoes of residential school / domestic service)
+- "Informants" in research contexts (implies extraction, not partnership)
+- Agency minimisation: describing historical violence as if it were mutual or reciprocal when it was not
+Example from literature: "'Training' sounds like something done to animals or domestic servants" (Pyett et al., 2008)
+
+Theme 4 — OTHERING (~7%)
+Social and cultural labelling that exoticises, discriminates against, and marginalises Indigenous Peoples, maintaining the misperception they are fundamentally inferior and different. Look for:
+- "Aboriginal community" used to mark as outside the norm
+- "Those people," "these natives," "the Indigenous" as othering constructions
+- Grouping Indigenous Peoples with other minority/migrant groups in ways that erase their distinct constitutional and Treaty status
+- Language implying Indigenous peoples are an exotic subject of study rather than rights-bearing peoples
+- "Fundamentally different" essentialism
+Example from literature: "are from an Aboriginal or Torres Strait Islander, Polynesian, Asian or Middle Eastern background" — bundling erases distinct Indigenous status
+
+Theme 5 — RESPECTFUL PRACTICES (positive — commend these) (~11%)
+Acknowledges colonial harms, centres Indigenous agency, and prioritises collaboration. Flag these as positive findings:
+- Naming specific Nations, Elders, Knowledge Keepers
+- OCAP® principles (Ownership, Control, Access, Possession)
+- UNDRIP, Nation-to-Nation, Free Prior and Informed Consent (FPIC)
+- Self-determination, decolonise/decolonization
+- Strengths-based, trauma-informed, culturally safe language
+- Two-Eyed Seeing / Etuaptmumk
+- Reconciliation (when paired with structural commitment, not superficially)
+- "Not the sole expert" — acknowledging Indigenous epistemological authority
+Example from literature: "First Nations and Métis education goals … are integral … not an 'add-on'" (Wotherspoon & Milne, 2020)
+
+Theme 6 — REVISIONIST HISTORY (~6%)
+Sanitising, glamorising, or diluting the violence and cruelties of colonisation. Look for:
+- "Cowboys and Indians" framing (has been used by soldiers to frame Indigenous peoples as targets)
+- Discovery language: "discovered," "New World," "first explorers"
+- Civilising mission: "brought civilisation," "opened up the land"
+- Harmonious contact narratives that omit violence: "two cultures merging," "friendly natives"
+- Triumphal framing of colonial conquests
+- Tourist-board language presenting colonisation as benevolent or mutual
+- Thanksgiving-style narratives of shared harvest ignoring subsequent genocide
+Example from literature: "Plymouth is the place where ancient traditions of gratitude … merged" erasing colonisation
+
+Theme 7 — EGALITARIAN COLOR-BLINDNESS (~5%)
+Disregarding racial/cultural differences in the name of alleged equality, weaponising equality to justify exclusionary practices. Look for:
+- "I prefer to treat everyone the same" in response to Indigenous-specific rights or programs
+- "Across the board for everyone" as an argument against Treaty rights or targeted programs
+- "Why target these people?" or "Why single out?" framing
+- "Reverse discrimination" claims about Indigenous rights
+- False universalism that ignores documented structural inequity
+- Failure to acknowledge colonial injustices while asserting current fairness
+Example from literature: "Why do we have to target these people so much? Make it across the board for everyone." (Tang & Browne, 2008)
+
 ---
+ADDITIONAL GUIDELINES:
 ${guidelines}
 ---
 
-Return a JSON array of findings. Each finding must have:
-- "phrase": the exact text found (verbatim from the input)
-- "severity": "high", "medium", or "low"
-- "category": short label (e.g., "Colonial terminology", "Stereotyping")
-- "explanation": why this is problematic (1-2 sentences)
-- "suggestion": a respectful alternative phrase or rewording
+RESPONSE FORMAT:
+Return a JSON object: { "findings": [ ... ] }
+Each finding must have:
+- "phrase": exact verbatim text from the input (as it appears, do not paraphrase)
+- "theme": one of: "paternalistic" | "stereotyping" | "colonial" | "othering" | "respectful" | "revisionist" | "colorblind"
+- "severity": "high" | "medium" | "low" | "positive" (use "positive" for Theme 5 findings)
+- "category": concise label (e.g., "Paternalistic framing", "Alcohol stereotype", "Othering")
+- "explanation": 2-3 sentences explaining why this is problematic (or praiseworthy for positive) with reference to the relevant theme. Be specific to the text.
+- "suggestion": a respectful alternative phrasing, or "Continue this practice." for positive findings
 
-If nothing is found, return an empty array: []
-Return ONLY valid JSON — no markdown, no wrapping.`;
+Flag subtle patterns (framing, implication) as well as explicit slurs. Do not flag neutral academic language.
+If nothing problematic or praiseworthy is found, return: { "findings": [] }
+Return ONLY valid JSON — no markdown, no code fences, no wrapping.`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -259,7 +420,7 @@ Return ONLY valid JSON — no markdown, no wrapping.`;
         temperature: 0.2,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user",   content: `Analyse this text:\n\n${text}` },
+          { role: "user",   content: `Analyse this text for all seven themes:\n\n${text}` },
         ],
         response_format: { type: "json_object" },
       }),
@@ -344,7 +505,15 @@ Return ONLY valid JSON — no markdown, no wrapping.`;
   }
 
   // ── Render Results & Highlights ───────────────────────────
-  function renderResults(originalText, findings) {
+  function renderResults(originalText, findings, mode) {
+    // Show engine badge
+    if (engineBadge) {
+      engineBadge.textContent = mode === "rule-based" ? "Rule-based" : "GPT-4o";
+      engineBadge.className = "engine-badge engine-badge-" + (mode === "rule-based" ? "rule" : "llm");
+    }
+
+    orderedFindings = [];
+
     if (findings.length === 0) {
       resultsList.innerHTML = "";
       resultsList.classList.add("hidden");
@@ -360,43 +529,77 @@ Return ONLY valid JSON — no markdown, no wrapping.`;
       return;
     }
 
-    // Sort: high → medium → low
-    const order = { high: 0, medium: 1, low: 2 };
-    findings.sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
+    // Choose rendering strategy
+    if (mode === "rule-based" && window.NLPRules && window.NLPRules.THEMES) {
+      renderThemeGroups(findings);
+    } else {
+      renderSeverityList(findings);
+    }
 
-    // Summary counts
+    // Wire up card clicks (works for both layouts)
+    resultsList.querySelectorAll(".finding-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const idx = parseInt(card.dataset.index, 10);
+        showDetailModal(orderedFindings[idx]);
+      });
+    });
+
+    // Summary
+    const problemFindings = findings.filter((f) => f.severity !== "positive");
+    const goodFindings    = findings.filter((f) => f.severity === "positive");
     const counts = { high: 0, medium: 0, low: 0 };
-    findings.forEach((f) => counts[f.severity] = (counts[f.severity] || 0) + 1);
+    problemFindings.forEach((f) => { counts[f.severity] = (counts[f.severity] || 0) + 1; });
     const parts = [];
-    if (counts.high)   parts.push(`${counts.high} high`);
-    if (counts.medium) parts.push(`${counts.medium} medium`);
-    if (counts.low)    parts.push(`${counts.low} low`);
-    resultsSummary.textContent = `${findings.length} finding${findings.length > 1 ? "s" : ""}: ${parts.join(", ")}`;
-
-    // Build cards
-    resultsList.innerHTML = findings.map((f, i) => `
-      <div class="finding-card" data-index="${i}">
-        <span class="severity-badge severity-${f.severity}">${f.severity}</span>
-        <div class="finding-text">
-          <div class="finding-phrase">"${escapeHtml(f.phrase)}"</div>
-          <div class="finding-suggestion">→ ${escapeHtml(f.suggestion || "See details")}</div>
-        </div>
-      </div>
-    `).join("");
+    if (counts.high)         parts.push(`${counts.high} high`);
+    if (counts.medium)       parts.push(`${counts.medium} medium`);
+    if (counts.low)          parts.push(`${counts.low} low`);
+    if (goodFindings.length) parts.push(`${goodFindings.length} respectful practice${goodFindings.length !== 1 ? "s" : ""} ✓`);
+    const issueCount = problemFindings.length;
+    resultsSummary.textContent = `${issueCount} issue${issueCount !== 1 ? "s" : ""}: ${parts.join(", ")}`;
 
     resultsList.classList.remove("hidden");
     resultsPlaceholder.classList.add("hidden");
 
-    // Card click → modal
-    resultsList.querySelectorAll(".finding-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        const idx = parseInt(card.dataset.index, 10);
-        showDetailModal(findings[idx]);
-      });
-    });
-
     // Highlight in the text area
     highlightText(originalText, findings);
+  }
+
+  // ── Theme-grouped rendering (rule-based mode) ──────────────
+  function renderThemeGroups(findings) {
+    var themes = window.NLPRules.THEMES;
+    // Group findings by theme key
+    var grouped = {};
+    findings.forEach(function(f) {
+      if (!grouped[f.theme]) grouped[f.theme] = [];
+      grouped[f.theme].push(f);
+    });
+
+    var html = "";
+    themes.forEach(function(theme) {
+      var group = grouped[theme.key];
+      if (!group || group.length === 0) return;
+      var isPos = theme.positive;
+      html += `<div class="theme-group theme-${theme.key}${isPos ? " theme-positive" : ""}"><div class="theme-group-header"><span class="theme-number">${theme.code}</span><span class="theme-name">${escapeHtml(theme.label)}</span><span class="theme-count">${group.length}</span></div><div class="theme-group-findings">`;
+      group.forEach(function(f) {
+        var idx = orderedFindings.length;
+        orderedFindings.push(f);
+        var badgeText = isPos ? "✓" : f.severity;
+        var suggDisplay = isPos ? "Good practice detected" : ("→ " + (f.suggestion || "See details"));
+        html += `<div class="finding-card" data-index="${idx}"><span class="severity-badge severity-${f.severity}">${badgeText}</span><div class="finding-text"><div class="finding-phrase">"${escapeHtml(f.phrase)}"</div><div class="finding-suggestion">${escapeHtml(suggDisplay)}</div></div></div>`;
+      });
+      html += "</div></div>";
+    });
+    resultsList.innerHTML = html;
+  }
+
+  // ── Severity-list rendering (LLM mode) ───────────────────────
+  function renderSeverityList(findings) {
+    var severityOrder = { high: 0, medium: 1, low: 2 };
+    var sorted = findings.slice().sort((a, b) => (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3));
+    resultsList.innerHTML = sorted.map(function(f, i) {
+      orderedFindings.push(f);
+      return `<div class="finding-card" data-index="${i}"><span class="severity-badge severity-${f.severity}">${f.severity}</span><div class="finding-text"><div class="finding-phrase">"${escapeHtml(f.phrase)}"</div><div class="finding-suggestion">→ ${escapeHtml(f.suggestion || "See details")}</div></div></div>`;
+    }).join("");
   }
 
   // ── Highlight Text ────────────────────────────────────────
@@ -439,7 +642,8 @@ Return ONLY valid JSON — no markdown, no wrapping.`;
     let pos = 0;
     for (const m of filtered) {
       if (m.start > pos) html += escapeHtml(originalText.slice(pos, m.start));
-      const cls = `highlight highlight-${m.severity}`;
+      const sev = m.severity === "positive" ? "positive" : m.severity;
+      const cls = `highlight highlight-${sev}`;
       const phraseHtml = escapeHtml(originalText.slice(m.start, m.end));
       html += `<span class="${cls}" data-severity="${m.severity}" title="Click for details">${phraseHtml}</span>`;
       pos = m.end;
@@ -462,21 +666,36 @@ Return ONLY valid JSON — no markdown, no wrapping.`;
   // ── Detail Modal ──────────────────────────────────────────
   function showDetailModal(finding) {
     modalTitle.textContent = `"${finding.phrase}"`;
+    const isPositive = finding.severity === "positive";
+    // Look up full theme name if available
+    var themeName = "";
+    if (finding.theme && window.NLPRules && window.NLPRules.THEMES) {
+      var t = window.NLPRules.THEMES.find((x) => x.key === finding.theme);
+      if (t) themeName = `Theme ${t.code}: ${t.label}`;
+    }
+    const themeRow = themeName ? `
+      <div class="detail-row">
+        <div class="detail-label">Theme</div>
+        <div class="detail-value theme-label theme-${finding.theme}">${escapeHtml(themeName)}</div>
+      </div>` : "";
+    const actionLabel = isPositive ? "Why This Is Good Practice" : "Why This Is Flagged";
+    const suggLabel   = isPositive ? "Recommendation" : "Suggested Alternative";
+    const badgeText   = isPositive ? "✓ good practice" : finding.severity;
     modalBody.innerHTML = `
       <div class="detail-row">
         <div class="detail-label">Severity</div>
-        <div class="detail-value"><span class="severity-badge severity-${finding.severity}">${finding.severity}</span></div>
-      </div>
+        <div class="detail-value"><span class="severity-badge severity-${finding.severity}">${badgeText}</span></div>
+      </div>${themeRow}
       <div class="detail-row">
         <div class="detail-label">Category</div>
         <div class="detail-value">${escapeHtml(finding.category || "General")}</div>
       </div>
       <div class="detail-row">
-        <div class="detail-label">Why This Is Flagged</div>
+        <div class="detail-label">${escapeHtml(actionLabel)}</div>
         <div class="detail-value">${escapeHtml(finding.explanation || "")}</div>
       </div>
       <div class="detail-row">
-        <div class="detail-label">Suggested Alternative</div>
+        <div class="detail-label">${escapeHtml(suggLabel)}</div>
         <div class="detail-value"><span class="suggestion-text">${escapeHtml(finding.suggestion || "No suggestion available")}</span></div>
       </div>`;
     detailModal.classList.remove("hidden");
